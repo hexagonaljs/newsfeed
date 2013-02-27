@@ -4,19 +4,9 @@ var Gui,
 Gui = (function() {
 
   function Gui() {
-    this.hideGreetMessage = __bind(this.hideGreetMessage, this);
+    this.storyStructure = __bind(this.storyStructure, this);
 
-    this.restartClicked = __bind(this.restartClicked, this);
-
-    this.showGreetMessage = __bind(this.showGreetMessage, this);
-
-    this.hideAskForName = __bind(this.hideAskForName, this);
-
-    this.confirmNameButtonClicked = __bind(this.confirmNameButtonClicked, this);
-
-    this.showAskForName = __bind(this.showAskForName, this);
-
-    this.storiesStructure = __bind(this.storiesStructure, this);
+    this.appendStory = __bind(this.appendStory, this);
 
     this.showFeed = __bind(this.showFeed, this);
 
@@ -32,56 +22,23 @@ Gui = (function() {
     return element = $(html);
   };
 
-  Gui.prototype.showFeed = function(stories) {
+  Gui.prototype.showFeed = function() {
     var element;
-    element = this.createElementFor("#feed-template", {
-      stories: this.storiesStructure(stories)
-    });
+    element = this.createElementFor("#feed-template");
     return $(".main").append(element);
   };
 
-  Gui.prototype.storiesStructure = function(stories) {
-    var _this = this;
-    return stories.map(function(story) {
-      return {
-        authorName: story.post.author.name,
-        postContent: story.post.content
-      };
-    });
+  Gui.prototype.appendStory = function(story) {
+    var element;
+    element = this.createElementFor("#story-template", this.storyStructure(story));
+    return $(".feed").prepend(element);
   };
 
-  Gui.prototype.showAskForName = function() {
-    var confirmNameButton,
-      _this = this;
-    confirmNameButton = $("#confirm-name-button");
-    confirmNameButton.click(function() {
-      return _this.confirmNameButtonClicked($("#name-input").val());
-    });
-    return $("#name-input").focus();
-  };
-
-  Gui.prototype.confirmNameButtonClicked = function(name) {};
-
-  Gui.prototype.hideAskForName = function() {
-    return $(".ask-for-name").remove();
-  };
-
-  Gui.prototype.showGreetMessage = function(name) {
-    var element,
-      _this = this;
-    element = this.createElementFor("#greet-message-template", {
-      name: name
-    });
-    $(".main").append(element);
-    return $("#restart-link").click(function() {
-      return _this.restartClicked();
-    });
-  };
-
-  Gui.prototype.restartClicked = function() {};
-
-  Gui.prototype.hideGreetMessage = function() {
-    return $(".greet-message").remove();
+  Gui.prototype.storyStructure = function(story) {
+    return {
+      authorName: story.post.author.name,
+      postContent: story.post.content
+    };
   };
 
   return Gui;

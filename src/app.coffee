@@ -1,17 +1,20 @@
 #<< utils
 #<< newsfeed
 #<< gui
+#<< fake_web_sockets_adapter
 #<< glue
 
 class App
   constructor: ->
-    @newsfeed      = new Newsfeed()
-    gui          = new Gui()
-    glue         = new Glue(@newsfeed, gui)
-    
+    @newsfeed          = new Newsfeed()
+    gui                = new Gui()
+    webSocketsAdapter  = new FakeWebSocketsAdapter()
+    glue               = new Glue(@newsfeed, gui, webSocketsAdapter)
 
-    @fillWithHardcodedData()
     @newsfeed.start()
+    @fillWithHardcodedData()
+    
+    webSocketsAdapter.start()
     window.newsfeed = @newsfeed
 
   fillWithHardcodedData: =>

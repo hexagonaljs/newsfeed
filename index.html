@@ -11,20 +11,19 @@
 	</div>
 
   <script type="x-handlebars-template" id="feed-template">
+    <h1>Newsfeed</h1>
     <div class="feed">
-      <h1>Newsfeed</h1>
-      <hr/>
-      {{#each stories}}
-      <div class="story">
-        <span class="story-author">{{this.authorName}}</span>
-        <p class="first-story-content">
-          <i>{{this.postContent}}</i>
-        </p>
-      </div>
-      <hr/>
-      {{/each}}
-
     </div>
+  </script>
+
+  <script type="x-handlebars-template" id="story-template">
+    <div class="story">
+      <span class="story-author">{{authorName}}</span>
+      <p class="first-story-content">
+        <i>{{postContent}}</i>
+      </p>
+    </div>
+    <hr/>
   </script>
 
   <script src="vendors/base.js"></script>

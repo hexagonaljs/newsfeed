@@ -6,12 +6,14 @@ App = (function() {
   function App() {
     this.fillWithHardcodedData = __bind(this.fillWithHardcodedData, this);
 
-    var glue, gui;
+    var glue, gui, webSocketsAdapter;
     this.newsfeed = new Newsfeed();
     gui = new Gui();
-    glue = new Glue(this.newsfeed, gui);
-    this.fillWithHardcodedData();
+    webSocketsAdapter = new FakeWebSocketsAdapter();
+    glue = new Glue(this.newsfeed, gui, webSocketsAdapter);
     this.newsfeed.start();
+    this.fillWithHardcodedData();
+    webSocketsAdapter.start();
     window.newsfeed = this.newsfeed;
   }
 
