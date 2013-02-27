@@ -2,14 +2,14 @@ var Glue;
 
 Glue = (function() {
 
-  function Glue(useCase, gui) {
+  function Glue(newsfeed, gui) {
     var _this = this;
-    this.useCase = useCase;
+    this.newsfeed = newsfeed;
     this.gui = gui;
-    After(this.useCase, "start", function() {
-      return _this.gui.showFeed(_this.useCase.feed);
+    After(this.newsfeed, "start", function() {
+      return _this.gui.showFeed(_this.newsfeed.stories);
     });
-    LogAll(this.useCase);
+    LogAll(this.newsfeed);
     LogAll(this.gui);
   }
 

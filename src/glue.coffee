@@ -1,6 +1,6 @@
 class Glue
-  constructor: (@useCase, @gui)->
-    After(@useCase, "start", => @gui.showFeed(@useCase.feed))
+  constructor: (@newsfeed, @gui)->
+    After(@newsfeed, "start", => @gui.showFeed(@newsfeed.stories ))
     
-    LogAll(@useCase)
+    LogAll(@newsfeed)
     LogAll(@gui)

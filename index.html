@@ -12,23 +12,18 @@
 
   <script type="x-handlebars-template" id="feed-template">
     <div class="feed">
-      <p>Newsfeed</p>
+      <h1>Newsfeed</h1>
+      <hr/>
+      {{#each stories}}
+      <div class="story">
+        <span class="story-author">{{this.authorName}}</span>
+        <p class="first-story-content">
+          <i>{{this.postContent}}</i>
+        </p>
+      </div>
+      <hr/>
+      {{/each}}
 
-      <div class="story">
-        <span class="story-author">Andrzej Krzywda</span>
-        <p class="first-story-content">
-          Twitter profile of Uncle Bob - really good guy to follow, great programmer
-        </p>
-        <a href="#">Share on FB</a>
-      </div>
-      
-      <div class="story">
-        <span class="story-author">Piotr Zaniewicz</span>
-        <p class="first-story-content">
-          OMG, you can use google.com and search using keywords!
-        </p>
-        <a href="#">Share on FB</a>
-      </div>
     </div>
   </script>
 

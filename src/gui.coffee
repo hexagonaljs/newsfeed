@@ -8,9 +8,12 @@ class Gui
     html = template(data)
     element = $(html)
 
-  showFeed: (feed) =>
-    element = @createElementFor("#feed-template")
+  showFeed: (stories) =>
+    element = @createElementFor("#feed-template", stories: @storiesStructure(stories))
     $(".main").append(element)
+
+  storiesStructure: (stories) =>
+    stories.map( (story) => {authorName : story.post.author.name, postContent : story.post.content})
   
 
 

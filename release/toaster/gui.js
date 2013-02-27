@@ -16,6 +16,8 @@ Gui = (function() {
 
     this.showAskForName = __bind(this.showAskForName, this);
 
+    this.storiesStructure = __bind(this.storiesStructure, this);
+
     this.showFeed = __bind(this.showFeed, this);
 
     this.createElementFor = __bind(this.createElementFor, this);
@@ -30,10 +32,22 @@ Gui = (function() {
     return element = $(html);
   };
 
-  Gui.prototype.showFeed = function(feed) {
+  Gui.prototype.showFeed = function(stories) {
     var element;
-    element = this.createElementFor("#feed-template");
+    element = this.createElementFor("#feed-template", {
+      stories: this.storiesStructure(stories)
+    });
     return $(".main").append(element);
+  };
+
+  Gui.prototype.storiesStructure = function(stories) {
+    var _this = this;
+    return stories.map(function(story) {
+      return {
+        authorName: story.post.author.name,
+        postContent: story.post.content
+      };
+    });
   };
 
   Gui.prototype.showAskForName = function() {
