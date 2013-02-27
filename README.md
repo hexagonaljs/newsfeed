@@ -1,14 +1,15 @@
-hexagonal.js hello world example
+Newsfeed
 ====================
 
-This is the simplest possible hexagonaljs app.
-It shows all the basic concepts of a hexagonaljs architecture.
+This is a simple newsfeed implementation that used the hexagonaljs approach.
+This example is focused on showing real-time updates from the server.
 
 
 How to run it?
 --------------
 
 Just clone the repo and open index.html.
+Alternatively, see it at http://fast-shore-9907.herokuapp.com/
 
 How to work on it?
 ------------------
@@ -21,120 +22,84 @@ How to work on it?
 The app object
 --------------
 
-This is the starting point of the application. The app object initializes the use case object and the adapters. At the end it passes all of them to the glue code. Often it's also starting the useCase object.
+This is the starting point of the application. The app object initializes the use case object (newsfeed) and the adapters (gui and webSocketsAdapter). At the end it passes all of them to the glue code.
 
 ```coffeescript
-#<< utils
-#<< local_storage
-#<< use_case
-#<< gui
-#<< glue
-
 class App
   constructor: ->
-    useCase      = new UseCase()
-    gui          = new Gui()
-    glue         = new Glue(useCase, gui)
+    @newsfeed          = new Newsfeed()
+    gui                = new Gui()
+    webSocketsAdapter  = new FakeWebSocketsAdapter()
+    glue               = new Glue(@newsfeed, gui, webSocketsAdapter)
+
+    @newsfeed.start()
+    @fillWithHardcodedData()
     
-    useCase.start()
+    webSocketsAdapter.start()
+    window.newsfeed = @newsfeed
+
+  fillWithHardcodedData: =>
+    andrzej = new User("Andrzej Krzywda")
+    post = new Post(andrzej, "Look at this: http://hexagonaljs. Sounds like a clean way to Single Page Apps")
+    hexStory = new Story(post)
+
+    yashke = new User("Jan Filipowski")
+    blogPost = new Post(yashke, "Arkency blog: http://blog.arkency.com")
+    arkencyStory = new Story(blogPost)
+
+
+    @newsfeed.addStory(hexStory)
+    @newsfeed.addStory(arkencyStory)
 
 new App()
 ```
 
-The use case object
+The newsfeed object
 -------------------
 
-At the heart of an application lives the use case object. Let's look at the use case in this project:
+At the heart of an application lives the use case object. In this example it's the newsfeed object. 
 
 ```coffeescript
-class UseCase
+class Newsfeed
   constructor: ->
+    @stories = []
     
-  start: =>
-    @askForName()
+  start: => 
 
-  askForName: =>
-
-  nameProvided: (name) =>
-    @greetUser(name)
-
-  greetUser: (name) =>
-
-  restart: =>
-    @askForName()
+  addStory: (story) =>
+    @stories.push(story)
 ```
 
-The goal of the use case is to show the most important domain actions the user (or other actors) can make. It should be possible to see what kind of interaction happens in the use case. There should be nothing about GUI here. There should be nothing about the persistence (AJAX/API calls) here.
+The webSocketsAdapter object
+----------------------------
+
+This object simulates a typical Web Sockets usage. It just generates some random data, that are "pushed" into the newsfeed.
+
+```coffeescript
+class FakeWebSocketsAdapter
+  constructor: ->
+
+  start: =>
+    intervalId = setInterval((=> @newStoryPushed(@createStory())), 3000)
+    setTimeout(( => clearInterval(intervalId)), 20000)
+
+  createStory: () =>
+    name = ["Andrzej", "Yashke", "Rupert", "Pawel"].sample()
+    author = new User(name)
+    post = new Post(author, "some fake data here at #{new Date().toLocaleTimeString()} which I disagree with.\n")
+    story = new Story(post)
+    return story
+
+  newStoryPushed: (story) =>
+```
+
+The adapter is connected with the rest of the application via some glue code:
+
+```coffeescript
+After(@webSocketsAdapter, "newStoryPushed", (story) => @newsfeed.addStory(story))
+```
 
 The gui object
 --------------
 
-The idea of hexagonal architecture is based on the idea of adapters that are plugged into the domain. One of typical adapters is the gui object. It's responsible for reacting to useCase actions and for letting the user interact with the app. The gui itself shouldn't have any logic. Often, it's just a proxy between the user and the app.
-
-```coffeescript
-class Gui
-  constructor: ->
-
-  createElementFor: (templateId, data) =>
-    source = $(templateId).html()
-    template = Handlebars.compile(source)
-    html = template(data)
-    element = $(html)
-  
-  showAskForName: =>
-    element = @createElementFor("#ask-for-name-template")
-    $(".main").append(element)
-    confirmNameButton = $("#confirm-name-button")
-    confirmNameButton.click( => @confirmNameButtonClicked($("#name-input").val()))
-    $("#name-input").focus()
-    
-  confirmNameButtonClicked: (name) =>
-
-  hideAskForName: =>
-    $(".ask-for-name").remove()
-
-  showGreetMessage: (name) =>
-    element = @createElementFor("#greet-message-template", {name : name})
-    $(".main").append(element)
-    $("#restart-link").click( => @restartClicked())
-
-  restartClicked: =>
-
-  hideGreetMessage: =>
-    $(".greet-message").remove()
-```
-
-In this example, jQuery is used for selectors and basic DOM manipulation (remove, append etc). Handlebars is used for HTML rendering. As you see, some of the methods here are the GUI equivalents of the use case object methods, like: askForName -> showAskForName, greetUser -> showGreetMessage.
-
-The glue object
----------------
-
-The use case and gui objects don't know each other. It's great for reducing coupling and better testability. At some point, though, you need to run them together. We call it a glue object. It's responsible for merging the useCase and gui objects. In larger apps, it's also used for merging other adapters, like ServerSideAdapter, LocalStorageAdapter, PusherAdapter, SoundAdapter, etc.
-
-```coffeescript
-class Glue
-  constructor: (@useCase, @gui, @storage)->
-    After(@useCase, "askForName", => @gui.showAskForName())
-    After(@useCase, "nameProvided", => @gui.hideAskForName())
-    After(@useCase, "greetUser", (name) => @gui.showGreetMessage(name))
-    After(@useCase, "restart", => @gui.hideGreetMessage())
-    
-    After(@gui, "restartClicked", => @useCase.restart())
-    After(@gui, "confirmNameButtonClicked", (name) => @useCase.nameProvided(name))
-```
-
-You can find the definition of the After method in the utils.coffee file. It's basically wrapping one function with another. If you look at:
-
-```coffeescript
-After(@useCase, "askForName", => @gui.showAskForName())
-```
-
-What it does, is replacing the original @useCase.askForName method with something like:
-
-```coffeescript
-askForName: =>
-  # original code
-  => @gui.showAskForName()
-```
-
-The use case and gui are merged runtime. The merge rules are defines in the glue code.
+The idea of hexagonal architecture is based on the idea of adapters that are plugged into the domain. One of typical adapters is the gui object. 
